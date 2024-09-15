@@ -1,0 +1,150 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Encryption Test</title>
+    <link rel="stylesheet" href="{% static 'assets/css/main.css' %}">
+    <style>
+        input[type="file"] {
+            display: none;
+        }
+    </style>
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        async function submitForm(event) {
+    event.preventDefault();
+    const formData = new FormData(document.getElementById('imageForm'));
+    const csrftoken = getCookie('csrftoken');
+
+    const response = await fetch('{% url "process_image" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken
+        },
+        body: formData
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+        const encryptedImagePreview = document.getElementById('encryptedImagePreview');
+        encryptedImagePreview.src = result.encrypted_image_url; // Use the URL returned from the server
+        encryptedImagePreview.style.display = 'block'; // Show the image
+    } else {
+        alert(result.error); // Display any errors
+    }
+}
+
+    </script>
+</head>
+<body>
+    <header id="header">
+        <h1 id="logo"><a href="{% url 'image_encryption_form' %}">Landed</a></h1>
+        <nav id="nav">
+            <ul>
+                <li><a href="{% url 'index_page' %}">Home</a></li>
+                <li><a href="{% url 'show_sbox_page' %}">Show Sbox Page</a></li>
+                <li><a href="{% url 'image_encryption_form' %}">Image Encryption</a></li>
+                <li><a href="{% url 'show_qrng_page' %}">Quantum Random Number Generation</a></li>
+                <li><a href="{% url 'encrypted_image_list' %}">Decrypted Images</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'logout' %}" class="button primary">Logout</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}" class="button primary">Login</a></li>
+                    <li><a href="{% url 'signup' %}" class="button primary">Sign Up</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <main id="main" class="wrapper style1">
+        <div class="container">
+            <header class="major">
+                <h2>Image Encryption Test</h2>
+                <p>Upload an image to encrypt it using a custom encryption algorithm.</p>
+            </header>
+            <section id="content">
+                <form id="imageForm" method="post" action="#" enctype="multipart/form-data" onsubmit="submitForm(event)">
+                    {% csrf_token %}
+                    <div class="row gtr-uniform gtr-50">
+                        <div class="col-12">
+                            <!-- Hidden File Input -->
+                            <input type="file" name="input_path" id="input_path" accept="image/*" onchange="handleFileChange(event)" required>
+                            <!-- Label Styled as Button -->
+                            <label for="input_path" class="button primary">Choose Image File</label>
+                        </div>
+                        <div class="col-12">
+                            <label for="doctor_name">Doctor's Name:</label>
+                            <input type="text" name="doctor_name" id="doctor_name" required placeholder="Doctor's Name">
+                        </div>
+                        <div class="col-12">
+                            <label for="aes_key">AES Key:</label>
+                            <input type="text" name="aes_key" id="aes_key" required placeholder="16 bytes AES Key">
+                        </div>
+                        <div class="col-12">
+                            <ul class="actions">
+                                <li><button type="submit" class="button primary">Encrypt Image</button></li>
+                                <li><button type="reset" class="button">Reset</button></li>
+                            </ul>
+                        </div>
+                    </div>
+                </form>
+                <!-- Encrypted Image Preview -->
+                <div class="col-12">
+                    <img id="encryptedImagePreview" src="" alt="Encrypted Image" style="display: none; margin-top: 20px; max-width: 100%; border: 1px solid #ccc; border-radius: 10px;" />
+                </div>
+            </section>
+
+            <section id="cybersecurity-medical-imaging">
+                <header class="major">
+                    <h2>Cybersecurity in Medical Imaging</h2>
+                    <p>Addressing the cybersecurity flaws in medical imaging systems.</p>
+                </header>
+                <div class="content">
+                    <p>In the digital age, where technology intersects with healthcare, the integrity and confidentiality of medical data are paramount...</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer id="footer">
+        <ul class="icons">
+            <li><a href="#" class="icon brands alt fa-twitter"><span class="label">Twitter</span></a></li>
+            <li><a href="#" class="icon brands alt fa-facebook-f"><span class="label">Facebook</span></a></li>
+            <li><a href="#" class="icon brands alt fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
+            <li><a href="#" class="icon brands alt fa-instagram"><span class="label">Instagram</span></a></li>
+            <li><a href="#" class="icon brands alt fa-github"><span class="label">GitHub</span></a></li>
+            <li><a href="#" class="icon solid alt fa-envelope"><span class="label">Email</span></a></li>
+        </ul>
+        <ul class="copyright">
+            <li>&copy; Untitled. All rights reserved.</li>
+            <li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+        </ul>
+    </footer>
+
+    <script src="{% static 'assets/js/jquery.min.js' %}"></script>
+    <script src="{% static 'assets/js/jquery.scrolly.min.js' %}"></script>
+    <script src="{% static 'assets/js/jquery.dropotron.min.js' %}"></script>
+    <script src="{% static 'assets/js/jquery.scrollex.min.js' %}"></script>
+    <script src="{% static 'assets/js/browser.min.js' %}"></script>
+    <script src="{% static 'assets/js/breakpoints.min.js' %}"></script>
+    <script src="{% static 'assets/js/util.js' %}"></script>
+    <script src="{% static 'assets/js/main.js' %}"></script>
+</body>
+</html>
